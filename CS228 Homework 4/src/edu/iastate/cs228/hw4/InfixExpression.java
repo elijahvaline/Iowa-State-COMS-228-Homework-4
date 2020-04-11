@@ -23,6 +23,7 @@ public class InfixExpression extends Expression {
 	private int rankTotal = 0; // Keeps track of the cumulative rank of the infix expression.
 
 	private PureStack<Operator> operatorStack; // stack of operators
+	private Scanner sc;
 
 	/**
 	 * Constructor stores the input infix string, and initializes the operand stack
@@ -123,7 +124,7 @@ public class InfixExpression extends Expression {
 	 * Sets postfixReady to true.
 	 */
 	public void postfix() throws ExpressionFormatException {
-		Scanner sc = new Scanner(infixExpression);
+		sc = new Scanner(infixExpression);
 		String curr;
 		int index = 0;
 		Operator o;
@@ -200,7 +201,7 @@ public class InfixExpression extends Expression {
 		}
 		
 		
-		// TODO
+		
 	}
 	
 	private boolean isMinus(String s, int index) {
