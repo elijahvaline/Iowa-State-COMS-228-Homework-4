@@ -124,6 +124,41 @@ public class InfixExpression extends Expression {
 	 */
 	public void postfix() throws ExpressionFormatException {
 		Scanner sc = new Scanner(infixExpression);
+		String curr;
+		int index = 0;
+		Operator o;
+		while (sc.hasNext()) {
+			curr = sc.next();
+
+			//is operator
+			if (super.isOperator(curr.charAt(0))) {
+				
+				if (curr.charAt(0) != '(' && curr.charAt(0) != ')') rankTotal--;
+				
+				if (isMinus(infixExpression, index) == true) {
+					
+					o = (new Operator('~'));
+				}
+				else {
+					o = new Operator(curr.charAt(0));
+				}
+				//if top compare cur == -1 push 
+				if (operatorStack.peek().compareTo(o) == -1) {
+					operatorStack.push(o);
+					
+				}
+				else {
+					outputHigherOrEqual(o);
+				}
+		
+				
+			}
+			//is a number or variable i.e. not operator.
+			else {
+				super.postfixExpression = super.postfixExpression + curr + " ";
+				rankTotal++;
+			}	
+		}	
 	}
 
 	/**
@@ -166,6 +201,22 @@ public class InfixExpression extends Expression {
 		
 		
 		// TODO
+	}
+	
+	private boolean isMinus(String s, int index) {
+		if (index == 0) {
+			return true;
+		}
+		else if (super.isOperator(s.charAt(index-1)) == true){
+			return true;
+			
+		}
+		if (s.charAt(index - 1) == '(') {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	// other helper methods if needed
