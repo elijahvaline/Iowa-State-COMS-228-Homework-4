@@ -33,7 +33,7 @@ public abstract class Expression {
 	 */
 	protected Expression(String st) {
 		postfixExpression = st;
-		setVarTable(this.varTable);
+//		setVarTable(this.varTable);
 
 	}
 	// TO DO
@@ -52,14 +52,14 @@ public abstract class Expression {
 
 		while (scan.hasNext()) {
 			curr = scan.next();
-			if (Character.isLetter(curr.charAt(1))) {
+			if (Character.isLetter(curr.charAt(0))) {
 				if (first == true) {
 					System.out.println("where");
 					first = false;
 				}
-				System.out.println(curr.charAt(1) + " = ");
+				System.out.println(curr.charAt(0) + " = ");
 				value = sc.nextInt();
-				varTbl.put(curr.charAt(1), value);
+				varTbl.put(curr.charAt(0), value);
 			}
 		}
 	}

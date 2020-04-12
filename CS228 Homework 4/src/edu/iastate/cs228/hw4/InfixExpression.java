@@ -1,5 +1,7 @@
 package edu.iastate.cs228.hw4;
 
+import java.util.ArrayList;
+
 /**
  *  
  * @author
@@ -18,9 +20,10 @@ import java.util.Scanner;
 
 public class InfixExpression extends Expression {
 	private String infixExpression; // the infix expression to convert
-	private String beforeConversion;
+
 	private boolean postfixReady = false; // postfix already generated if true
 	private int rankTotal = 0; // Keeps track of the cumulative rank of the infix expression.
+	private String p;
 
 	private PureStack<Operator> operatorStack; // stack of operators
 	private Scanner sc;
@@ -35,9 +38,9 @@ public class InfixExpression extends Expression {
 	 */
 	public InfixExpression(String st, HashMap<Character, Integer> varTbl) {
 		super(st, varTbl);
-		beforeConversion = st;
+
 		infixExpression = st;
-		super.postfixExpression = infixExpression;
+//		super.postfixExpression = infixExpression;
 
 	}
 
@@ -48,9 +51,10 @@ public class InfixExpression extends Expression {
 	 */
 	public InfixExpression(String s) {
 		super(s);
-		beforeConversion = s;
+		operatorStack = new ArrayBasedStack<Operator>();
+
 		infixExpression = s;
-		super.postfixExpression = infixExpression;
+
 	}
 
 	/**
@@ -59,7 +63,7 @@ public class InfixExpression extends Expression {
 	 */
 	@Override
 	public String toString() {
-		return beforeConversion;
+		return InfixExpression.spaceOut(infixExpression);
 	}
 
 	/**
@@ -73,9 +77,8 @@ public class InfixExpression extends Expression {
 			return super.postfixExpression;
 		} else {
 			try {
-				postfix();
 				return super.postfixExpression;
-				
+
 			}
 
 			catch (Exception ExpressionFormatException) {
@@ -123,43 +126,79 @@ public class InfixExpression extends Expression {
 	 * 
 	 * Sets postfixReady to true.
 	 */
+	// deal with the rank stuff
 	public void postfix() throws ExpressionFormatException {
 		sc = new Scanner(infixExpression);
 		String curr;
 		int index = 0;
 		Operator o;
+		super.postfixExpression = "";
+		p = "";
+		boolean failed = false;
+
 		while (sc.hasNext()) {
 			curr = sc.next();
 
-			//is operator
+			// is operator
 			if (super.isOperator(curr.charAt(0))) {
-				
-				if (curr.charAt(0) != '(' && curr.charAt(0) != ')') rankTotal--;
-				
+
+				if (curr.charAt(0) != '(' && curr.charAt(0) != ')' && !isMinus(infixExpression, index))
+					rankTotal--;
+
 				if (isMinus(infixExpression, index) == true) {
-					
+
 					o = (new Operator('~'));
-				}
-				else {
+				} else {
 					o = new Operator(curr.charAt(0));
 				}
-				//if top compare cur == -1 push 
-				if (operatorStack.peek().compareTo(o) == -1) {
+				// if top compare cur == -1 push
+
+				if (operatorStack.size() != 0) {
+					if (operatorStack.peek().compareTo(o) == -1) {
+						operatorStack.push(o);
+
+					}
+
+					else {
+
+						outputHigherOrEqual(o);
+
+					}
+				} else {
 					operatorStack.push(o);
-					
 				}
-				else {
-					outputHigherOrEqual(o);
-				}
-		
-				
+
 			}
-			//is a number or variable i.e. not operator.
+			// is a number or variable i.e. not operator.
 			else {
 				super.postfixExpression = super.postfixExpression + curr + " ";
+				p = super.postfixExpression;
 				rankTotal++;
-			}	
-		}	
+			}
+
+			if (rankTotal > 1) {
+				System.out.println("Operator Expected");
+				failed = true;
+				super.postfixExpression = "";
+				break;
+			}
+
+			else if (rankTotal < -1) {
+				System.out.println("Operand Expected");
+				failed = true;
+				super.postfixExpression = "";
+				break;
+			}
+
+			index++;
+		}
+
+		if (operatorStack.size() != 0 && !failed) {
+			for (int i = 0; i < operatorStack.size() + 1; i++) {
+				super.postfixExpression = super.postfixExpression + operatorStack.pop().operator + " ";
+				p = super.postfixExpression;
+			}
+		}
 	}
 
 	/**
@@ -190,35 +229,68 @@ public class InfixExpression extends Expression {
 	 */
 	private void outputHigherOrEqual(Operator op) {
 		Operator curr = operatorStack.peek();
-		if (curr.compareTo(op) >= 0){
-			if (op.operator == ')' && curr.operator == '(') {
+		if (curr.compareTo(op) >= 0) {
+			if (op.operator == ')') {// && curr.operator == '(') {
+				while (operatorStack.peek().operator != '(') {
+					super.postfixExpression += operatorStack.pop().operator + " ";
+				}
 				operatorStack.pop();
+			} else {
+				super.postfixExpression += operatorStack.pop().operator + " ";
+				p = super.postfixExpression;
+				operatorStack.push(op);
 			}
-			super.postfixExpression += op.operator + " " + operatorStack.pop().operator + " ";	
-		}
-		else {	
+		} else {
 			operatorStack.push(op);
 		}
-		
-		
-		
+
 	}
-	
+
 	private boolean isMinus(String s, int index) {
-		if (index == 0) {
-			return true;
+		ArrayList<String> temp = new ArrayList<String>();
+		Scanner scanner = new Scanner(s);
+		String curr = "";
+		while (scanner.hasNext()) {
+			curr = scanner.next();
+			temp.add(curr);
 		}
-		else if (super.isOperator(s.charAt(index-1)) == true){
-			return true;
-			
-		}
-		if (s.charAt(index - 1) == '(') {
-			return true;
-		}
-		else {
+		if (temp.get(index).charAt(0) == '-') {
+			if (index == 0) {
+				return true;
+			} else if (super.isOperator(temp.get(index - 1).charAt(0)) == true) {
+				if (temp.get(index - 1).charAt(0) != ')') {
+					return true;
+				} else {
+					return false;
+				}
+
+			}
+			if (temp.get(index - 1).charAt(0) == '(') {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
 			return false;
 		}
 	}
 
+	public static String spaceOut(String s) {
+
+		String newString = s;
+		int length = s.length();
+		for (int i = 0; i < length; i++) {
+			if (newString.charAt(i) == '(') {
+				newString = newString.substring(0, i+1) + newString.substring(i + 2);
+				length--;
+			} else if (newString.charAt(i) == ')') {
+				newString = newString.substring(0, i-1) + newString.substring(i);
+				i--;
+				length--;
+
+			}
+		}
+		return newString;
+	}
 	// other helper methods if needed
 }

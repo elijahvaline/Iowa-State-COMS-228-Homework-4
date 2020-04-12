@@ -4,17 +4,18 @@ import java.util.Scanner;
 
 public class test {
 
-	public static void main(String[] args) {
-		String s = "a b 5 2 f s";
-		Scanner sc = new Scanner(s);
-		int i = 15;
+	public static void main(String[] args) throws ExpressionFormatException {
+		String s = "- ( 2 * i % - 3 ) * 5";
+		InfixExpression e = new InfixExpression(s);
+		System.out.println(e.toString());
 		
-		while (sc.hasNext()) {
-			System.out.println(sc.next());
-		}
+		
 
-		System.out.println(Expression.removeExtraSpaces(s));
-		System.out.println(s);
+		e.postfix();
+		System.out.println(e.postfixString());
+		
+		
+
 	}
 
 }
