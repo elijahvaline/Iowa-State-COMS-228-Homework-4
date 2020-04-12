@@ -24,9 +24,11 @@ public class InfixExpression extends Expression {
 	private boolean postfixReady = false; // postfix already generated if true
 	private int rankTotal = 0; // Keeps track of the cumulative rank of the infix expression.
 	private String p;
+	private int right, left;
 
 	private PureStack<Operator> operatorStack; // stack of operators
 	private Scanner sc;
+	private Scanner scanner;
 
 	/**
 	 * Constructor stores the input infix string, and initializes the operand stack
@@ -38,7 +40,6 @@ public class InfixExpression extends Expression {
 	 */
 	public InfixExpression(String st, HashMap<Character, Integer> varTbl) {
 		super(st, varTbl);
-
 		infixExpression = st;
 //		super.postfixExpression = infixExpression;
 
@@ -125,23 +126,37 @@ public class InfixExpression extends Expression {
 	 * you define.
 	 * 
 	 * Sets postfixReady to true.
+	 * @throws Exception 
 	 */
 	// deal with the rank stuff
-	public void postfix() throws ExpressionFormatException {
+	public void postfix() throws Exception {
 		sc = new Scanner(infixExpression);
 		String curr;
 		int index = 0;
 		Operator o;
 		super.postfixExpression = "";
-		p = "";
-		boolean failed = false;
+		
+		
 
 		while (sc.hasNext()) {
 			curr = sc.next();
+			if (!Expression.isOperator(curr.charAt(0)) && !Expression.isVariable(curr.charAt(0)) && !Expression.isInt(curr)) {
+				throw new Exception("Invalid character");
+			}
 
 			// is operator
 			if (super.isOperator(curr.charAt(0))) {
-
+				
+				switch (curr.charAt(0)) {
+				case '(':
+					left++;
+					break;
+				case ')':
+					right++;
+					break;
+				}
+				
+				
 				if (curr.charAt(0) != '(' && curr.charAt(0) != ')' && !isMinus(infixExpression, index))
 					rankTotal--;
 
@@ -172,31 +187,42 @@ public class InfixExpression extends Expression {
 			// is a number or variable i.e. not operator.
 			else {
 				super.postfixExpression = super.postfixExpression + curr + " ";
-				p = super.postfixExpression;
+				
 				rankTotal++;
 			}
 
 			if (rankTotal > 1) {
-				System.out.println("Operator Expected");
-				failed = true;
-				super.postfixExpression = "";
-				break;
+				
+				throw new Exception("Operator Expected");
+//				failed = true;
+//				super.postfixExpression = "";
+//				break;
 			}
 
 			else if (rankTotal < -1) {
-				System.out.println("Operand Expected");
-				failed = true;
-				super.postfixExpression = "";
-				break;
+				
+				throw new Exception("Operand Expected");
+//				failed = true;
+//				super.postfixExpression = "";
+//				break;
+			}
+			else if (right > left) {
+				throw new Exception("Missing '('");
 			}
 
 			index++;
 		}
 
-		if (operatorStack.size() != 0 && !failed) {
-			for (int i = 0; i < operatorStack.size() + 1; i++) {
+		if (operatorStack.size() != 0) {
+			while (operatorStack.isEmpty() == false) {
+				
+				if (operatorStack.peek().operator == '(') {
+					throw new Exception("Missing ')'");
+				}
+				
 				super.postfixExpression = super.postfixExpression + operatorStack.pop().operator + " ";
-				p = super.postfixExpression;
+				
+				
 			}
 		}
 	}
@@ -212,8 +238,10 @@ public class InfixExpression extends Expression {
 	 * @throws ExpressionFormatException, UnassignedVariableException
 	 */
 	public int evaluate() {
-		// TODO
-		return 0;
+		int value = 0;
+		PostfixExpression p = new PostfixExpression(super.postfixExpression);
+		value = p.evaluate();
+		return value;
 	}
 
 	/**
@@ -248,7 +276,7 @@ public class InfixExpression extends Expression {
 
 	private boolean isMinus(String s, int index) {
 		ArrayList<String> temp = new ArrayList<String>();
-		Scanner scanner = new Scanner(s);
+		scanner = new Scanner(s);
 		String curr = "";
 		while (scanner.hasNext()) {
 			curr = scanner.next();
@@ -292,5 +320,4 @@ public class InfixExpression extends Expression {
 		}
 		return newString;
 	}
-	// other helper methods if needed
 }

@@ -35,6 +35,7 @@ public class PostfixExpression extends Expression {
 		super(st,varTbl);
 		leftOperand = 0;
 		rightOperand = 0;
+		operandStack = new ArrayBasedStack<Integer>();
 	}
 
 	/**
@@ -43,10 +44,11 @@ public class PostfixExpression extends Expression {
 	 * @param s
 	 */
 	public PostfixExpression(String s) {
-		super(s);
-		
+		super(s);		
 		leftOperand = 0;
 		rightOperand = 0;
+		super.setVarTable(super.varTable);
+		operandStack = new ArrayBasedStack<Integer>();
 	}
 
 	/**
@@ -183,28 +185,34 @@ public class PostfixExpression extends Expression {
 		switch (op) {
 		case '~':
 			returner = 0 - rightOperand;
-			
+			break;
 		case '+':
 
 			returner =  leftOperand + rightOperand;
+			break;
 		case '-':
 
 			returner = leftOperand - rightOperand;
+			break;
 		case '*':
 
 			returner = leftOperand * rightOperand;
+			break;
 		case '/':
 
 			returner = leftOperand / rightOperand;
+			break;
 		case '%':
 
 			returner = leftOperand % rightOperand;
+			break;
 		case '^':
 			cur = leftOperand;
 			for (int i = 0; i<rightOperand-1; i++) {
 				leftOperand *= cur;
 			}
 			returner = leftOperand;
+			break;
 		}
 		return returner; 
 	}

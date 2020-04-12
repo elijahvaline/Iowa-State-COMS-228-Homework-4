@@ -23,6 +23,7 @@ public abstract class Expression {
 	protected Expression(String st, HashMap<Character, Integer> varTbl) {
 		postfixExpression = st;
 		varTable = varTbl;
+		this.varTable = varTbl;
 		// TODO
 	}
 
@@ -33,6 +34,7 @@ public abstract class Expression {
 	 */
 	protected Expression(String st) {
 		postfixExpression = st;
+		varTable = new HashMap<Character, Integer>();
 //		setVarTable(this.varTable);
 
 	}
@@ -57,7 +59,7 @@ public abstract class Expression {
 					System.out.println("where");
 					first = false;
 				}
-				System.out.println(curr.charAt(0) + " = ");
+				System.out.print(curr.charAt(0) + " = ");
 				value = sc.nextInt();
 				varTbl.put(curr.charAt(0), value);
 			}
