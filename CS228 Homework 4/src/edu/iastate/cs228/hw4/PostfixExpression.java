@@ -145,7 +145,7 @@ public class PostfixExpression extends Expression {
 					value = super.varTable.get(curr.charAt(0));
 					operandStack.push(value);
 				} else {
-					throw new UnassignedVariableException("Variable" + curr.charAt(0) + "was not assigned a value");
+					throw new UnassignedVariableException("Variable " + curr.charAt(0) + " was not assigned a value");
 				}
 			}
 			

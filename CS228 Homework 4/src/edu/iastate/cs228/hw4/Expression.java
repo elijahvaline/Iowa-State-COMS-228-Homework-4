@@ -34,8 +34,7 @@ public abstract class Expression {
 	 */
 	protected Expression(String st) {
 		postfixExpression = st;
-		varTable = new HashMap<Character, Integer>();
-//		setVarTable(this.varTable);
+		setVarTable(new HashMap<Character, Integer>());
 
 	}
 	// TO DO
@@ -46,24 +45,7 @@ public abstract class Expression {
 	 * @param varTbl
 	 */
 	public void setVarTable(HashMap<Character, Integer> varTbl) {
-		scan = new Scanner(postfixExpression);
-		sc = new Scanner(System.in);
-		boolean first = true;
-		int value;
-		String curr;
-
-		while (scan.hasNext()) {
-			curr = scan.next();
-			if (Character.isLetter(curr.charAt(0))) {
-				if (first == true) {
-					System.out.println("where");
-					first = false;
-				}
-				
-				value = sc.nextInt();
-				varTbl.put(curr.charAt(0), value);
-			}
-		}
+		this.varTable = varTbl;
 	}
 
 	/**

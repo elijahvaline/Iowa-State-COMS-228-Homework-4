@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class test {
 
 	public static void main(String[] args) throws Exception {
-		String s = "( 3 + 2 + + + ) % 2";
+		String s = "( 3 + n ) * 5";
 		InfixExpression e = new InfixExpression(s);
 		System.out.println(e.toString());
 		try {

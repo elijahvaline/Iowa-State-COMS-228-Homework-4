@@ -41,6 +41,7 @@ public class InfixExpression extends Expression {
 	public InfixExpression(String st, HashMap<Character, Integer> varTbl) {
 		super(st, varTbl);
 		infixExpression = st;
+		operatorStack = new ArrayBasedStack<Operator>();
 //		super.postfixExpression = infixExpression;
 
 	}
@@ -78,11 +79,12 @@ public class InfixExpression extends Expression {
 			return super.postfixExpression;
 		} else {
 			try {
+				postfix();
 				return super.postfixExpression;
 
 			}
 
-			catch (Exception ExpressionFormatException) {
+			catch (Exception e) {
 				return null;
 			}
 		}
@@ -225,6 +227,7 @@ public class InfixExpression extends Expression {
 				
 			}
 		}
+		this.postfixReady = true;
 	}
 
 	/**
@@ -240,7 +243,7 @@ public class InfixExpression extends Expression {
 	 */
 	public int evaluate() throws ExpressionFormatException, UnassignedVariableException {
 		int value = 0;
-		PostfixExpression p = new PostfixExpression(super.postfixExpression);
+		PostfixExpression p = new PostfixExpression(super.postfixExpression, super.varTable);
 		value = p.evaluate();
 		return value;
 	}
