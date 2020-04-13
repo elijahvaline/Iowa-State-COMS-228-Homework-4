@@ -20,8 +20,10 @@ public class PostfixExpression extends Expression {
 	private int leftOperand; // left operand for the current evaluation step
 	private int rightOperand; // right operand (or the only operand in the case of
 								// a unary minus) for the current evaluation step
+	String noVar;
 
 	private PureStack<Integer> operandStack; // stack of operands
+	private Scanner sc;
 
 	/**
 	 * Constructor stores the input postfix string and initializes the operand
@@ -32,10 +34,12 @@ public class PostfixExpression extends Expression {
 	 *               their values.
 	 */
 	public PostfixExpression(String st, HashMap<Character, Integer> varTbl) {
-		super(st,varTbl);
+		super(st, varTbl);
 		leftOperand = 0;
 		rightOperand = 0;
 		operandStack = new ArrayBasedStack<Integer>();
+		noVar = this.removeVariables();
+
 	}
 
 	/**
@@ -44,10 +48,11 @@ public class PostfixExpression extends Expression {
 	 * @param s
 	 */
 	public PostfixExpression(String s) {
-		super(s);		
+		super(s);
 		leftOperand = 0;
 		rightOperand = 0;
 		super.setVarTable(super.varTable);
+
 		operandStack = new ArrayBasedStack<Integer>();
 	}
 
@@ -79,6 +84,7 @@ public class PostfixExpression extends Expression {
 	 * stop the evaluation.
 	 * 
 	 * @return value of the postfix expression
+	 * @throws Exception
 	 * @throws ExpressionFormatException with one of the messages below:
 	 * 
 	 *                                   -- "Invalid character" if encountering a
@@ -105,39 +111,72 @@ public class PostfixExpression extends Expression {
 	 *                                   variable.
 	 * 
 	 */
-	//This method is still very iffy. Im not totally sure whats going down and i still need to deal with the exceptions.
-	public int evaluate() {
-		
-		Scanner sc = new Scanner(postfixExpression);
+
+	public int evaluate() throws ExpressionFormatException, UnassignedVariableException {
+
+		sc = new Scanner(super.postfixExpression);
 		String curr;
 		int value;
-		int ov;
-		
+		noVar = this.removeVariables();
+
+//		if (containsOtherVariables() == true) {
+//			
+//			throw new UnassignedVariableException();
+//		}
+
 		while (sc.hasNext()) {
-			
+
 			curr = sc.next();
-			
-			if (super.isInt(curr) == false && super.isOperator(curr.charAt(0)) == false && super.isVariable(curr.charAt(0)) == false) break;
-			
-			//is value
+
+			if (super.isInt(curr) == false && super.isOperator(curr.charAt(0)) == false
+					&& super.isVariable(curr.charAt(0)) == false)
+				throw new ExpressionFormatException("Invalid character");
+
+			// is value
 			if (super.isInt(curr)) {
 				value = Integer.parseInt(curr);
 				operandStack.push(value);
 			}
-			//is variable
+			
+			// is variable
 			else if (super.isVariable(curr.charAt(0))) {
-				value = super.varTable.get(curr.charAt(0));
-				operandStack.push(value);
-			}
-			//is operator
-			else {
-				getOperands(curr.charAt(0));
-				value = compute(curr.charAt(0));
-				operandStack.push(value);
 				
+				if (super.varTable.containsKey(curr.charAt(0))) {
+					value = super.varTable.get(curr.charAt(0));
+					operandStack.push(value);
+				} else {
+					throw new UnassignedVariableException("Variable" + curr.charAt(0) + "was not assigned a value");
+				}
+			}
+			
+			// is operator
+			else {
+
+				if (curr.charAt(0) == '/' || curr.charAt(0) == '%') {
+					if (rightOperand == 0) {
+						throw new ExpressionFormatException("Divide by zero");
+					}
+				}
+				if (curr.charAt(0) == '^') {
+					if (leftOperand == 0 && rightOperand == 0) {
+						throw new ExpressionFormatException("0^0");
+					}
+				}
+
+				try {
+					getOperands(curr.charAt(0));
+					value = compute(curr.charAt(0));
+					operandStack.push(value);
+				} catch (Exception NoSuchElementException) {
+					throw new ExpressionFormatException("Too many operators");
+				}
+
 			}
 		}
-		
+
+		if (operandStack.size() > 1) {
+			throw new ExpressionFormatException("Too many operands");
+		}
 		return operandStack.pop();
 	}
 
@@ -188,7 +227,7 @@ public class PostfixExpression extends Expression {
 			break;
 		case '+':
 
-			returner =  leftOperand + rightOperand;
+			returner = leftOperand + rightOperand;
 			break;
 		case '-':
 
@@ -208,12 +247,62 @@ public class PostfixExpression extends Expression {
 			break;
 		case '^':
 			cur = leftOperand;
-			for (int i = 0; i<rightOperand-1; i++) {
+			for (int i = 0; i < rightOperand - 1; i++) {
 				leftOperand *= cur;
 			}
 			returner = leftOperand;
 			break;
 		}
-		return returner; 
+		return returner;
 	}
+
+	private String removeVariables() {
+		String n = super.postfixExpression;
+		Character curr;
+		int length = n.length();
+
+		for (int i = 0; i < length; i++) {
+			curr = n.charAt(i);
+
+			if (Expression.isVariable(curr)) {
+				if (super.varTable.containsKey(curr)) {
+					n = n.substring(0, i - 1) + " " + super.varTable.get(curr) + n.substring(i + 1);
+				}
+			}
+
+		}
+		return n;
+	}
+//
+//	private boolean containsOther() {
+//		int length = this.noVar.length();
+//
+//		for (int i = 0; i < length; i++) {
+//			if (Expression.isInt(noVar.charAt(i) + "") == false && Expression.isOperator(noVar.charAt(i)) == false
+//					&& Character.isWhitespace(noVar.charAt(i)) == false) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+//
+//	private boolean containsOtherVariables() {
+//
+//		String n = super.postfixExpression;
+//		Character curr;
+//		int length = n.length();
+//
+//		for (int i = 0; i < length; i++) {
+//			curr = n.charAt(i);
+//
+//			if (Expression.isVariable(curr)) {
+//				if (!super.varTable.containsKey(curr)) {
+//					return true;
+//				}
+//			}
+//
+//		}
+//		return false;
+//
+//	}
 }

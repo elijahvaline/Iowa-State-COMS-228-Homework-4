@@ -236,8 +236,9 @@ public class InfixExpression extends Expression {
 	 * 
 	 * @return value of the infix expression
 	 * @throws ExpressionFormatException, UnassignedVariableException
+	 * @throws UnassignedVariableException 
 	 */
-	public int evaluate() {
+	public int evaluate() throws ExpressionFormatException, UnassignedVariableException {
 		int value = 0;
 		PostfixExpression p = new PostfixExpression(super.postfixExpression);
 		value = p.evaluate();

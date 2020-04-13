@@ -59,7 +59,7 @@ public abstract class Expression {
 					System.out.println("where");
 					first = false;
 				}
-				System.out.print(curr.charAt(0) + " = ");
+				
 				value = sc.nextInt();
 				varTbl.put(curr.charAt(0), value);
 			}
